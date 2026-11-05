@@ -12,6 +12,7 @@ import DisputesPage from './pages/DisputesPage';
 import GuidelineHealthPage from './pages/GuidelineHealthPage';
 import FactWatchPage from './pages/FactWatchPage';
 import VisualCompliancePage from './pages/VisualCompliancePage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 function AppLayout() {
   const { loading } = useAuth();
@@ -44,6 +45,7 @@ function AppLayout() {
           <Route path="/guideline-health" element={<GuidelineHealthPage />} />
           <Route path="/factwatch" element={<FactWatchPage />} />
           <Route path="/visual" element={<VisualCompliancePage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="*" element={<Navigate to="/guidelines" replace />} />
         </Routes>
       </main>
