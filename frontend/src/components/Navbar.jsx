@@ -10,6 +10,7 @@ import {
   ClipboardList,
   Scale,
   HeartPulse,
+  BellRing,
   AlertCircle,
   LogOut, 
   Building2 
@@ -119,6 +120,7 @@ export default function Navbar() {
                 Disputes
               </NavLink>
               {role === 'admin' && <NavLink to="/guideline-health" className={({ isActive }) => `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}><HeartPulse className="w-4 h-4" />Guideline Health</NavLink>}
+              {role === 'admin' && <NavLink to="/factwatch" className={({ isActive }) => `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}><BellRing className="w-4 h-4" />FactWatch</NavLink>}
             </nav>
           </div>
 

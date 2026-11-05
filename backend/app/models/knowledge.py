@@ -53,6 +53,9 @@ class ApprovedFact(Base, TimestampMixin):
     status = Column(SQLEnum(FactStatus), default=FactStatus.APPROVED, nullable=False)
     approved_by_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
+    review_status = Column(String(30), nullable=False, default="pending")
+    reviewed_by_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
 
     # Relationships
     organization = relationship("Organization", back_populates="approved_facts")
