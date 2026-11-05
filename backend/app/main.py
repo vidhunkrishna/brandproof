@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import check_db_connection
-from app.api.routes import auth, guidelines, facts, documents, submissions, disputes
+from app.api.routes import auth, guidelines, facts, documents, submissions, disputes, guideline_health
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -28,6 +28,7 @@ app.include_router(facts.router, prefix=settings.API_V1_PREFIX)
 app.include_router(documents.router, prefix=settings.API_V1_PREFIX)
 app.include_router(submissions.router, prefix=settings.API_V1_PREFIX)
 app.include_router(disputes.router, prefix=settings.API_V1_PREFIX)
+app.include_router(guideline_health.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/", tags=["Root"])

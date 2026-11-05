@@ -17,6 +17,9 @@ class Guideline(Base, TimestampMixin):
     prohibited_phrases = Column(JSON, nullable=True)  # List[str] for deterministic matching
     required_phrases = Column(JSON, nullable=True)    # List[str] for deterministic matching
     source = Column(String(255), nullable=True)
+    scope = Column(String(255), nullable=True)
+    owner_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    review_due_at = Column(DateTime, nullable=True)
     version = Column(Integer, default=1, nullable=False)
     status = Column(SQLEnum(GuidelineStatus), default=GuidelineStatus.ACTIVE, nullable=False)
     created_by_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)

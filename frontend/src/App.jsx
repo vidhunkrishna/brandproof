@@ -9,6 +9,7 @@ import SubmitReviewPage from './pages/SubmitReviewPage';
 import ReviewResultPage from './pages/ReviewResultPage';
 import SubmissionHistoryPage from './pages/SubmissionHistoryPage';
 import DisputesPage from './pages/DisputesPage';
+import GuidelineHealthPage from './pages/GuidelineHealthPage';
 
 function AppLayout() {
   const { loading } = useAuth();
@@ -38,6 +39,7 @@ function AppLayout() {
           <Route path="/reviews/:submissionId" element={<ReviewResultPage />} />
           <Route path="/disputes" element={<DisputesPage />} />
           <Route path="/disputes/:disputeId" element={<DisputesPage />} />
+          <Route path="/guideline-health" element={<GuidelineHealthPage />} />
           <Route path="*" element={<Navigate to="/guidelines" replace />} />
         </Routes>
       </main>

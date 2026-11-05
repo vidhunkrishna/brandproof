@@ -14,6 +14,9 @@ class GuidelineCreateRequest(BaseModel):
     prohibited_phrases: Optional[List[str]] = Field(default_factory=list)
     required_phrases: Optional[List[str]] = Field(default_factory=list)
     source: Optional[str] = Field(default="Manual Entry", max_length=255)
+    scope: Optional[str] = Field(default=None, max_length=255)
+    owner_user_id: Optional[str] = None
+    review_due_at: Optional[datetime] = None
 
 
 class GuidelineUpdateRequest(BaseModel):
@@ -24,6 +27,9 @@ class GuidelineUpdateRequest(BaseModel):
     prohibited_phrases: Optional[List[str]] = None
     required_phrases: Optional[List[str]] = None
     source: Optional[str] = None
+    scope: Optional[str] = None
+    owner_user_id: Optional[str] = None
+    review_due_at: Optional[datetime] = None
 
 
 class GuidelineResponse(BaseModel):
@@ -38,6 +44,9 @@ class GuidelineResponse(BaseModel):
     prohibited_phrases: Optional[List[str]] = None
     required_phrases: Optional[List[str]] = None
     source: Optional[str] = None
+    scope: Optional[str] = None
+    owner_user_id: Optional[str] = None
+    review_due_at: Optional[datetime] = None
     version: int
     status: GuidelineStatus
     created_by_user_id: Optional[str] = None

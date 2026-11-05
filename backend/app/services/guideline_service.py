@@ -25,6 +25,9 @@ class GuidelineService:
             prohibited_phrases=req.prohibited_phrases or [],
             required_phrases=req.required_phrases or [],
             source=req.source.strip() if req.source else "Manual Entry",
+            scope=req.scope.strip() if req.scope else None,
+            owner_user_id=req.owner_user_id,
+            review_due_at=req.review_due_at,
             version=1,
             status=initial_status,
             created_by_user_id=ctx.user.id,
@@ -83,6 +86,12 @@ class GuidelineService:
             guideline.category = req.category.strip().lower()
         if req.source is not None:
             guideline.source = req.source.strip()
+        if req.scope is not None:
+            guideline.scope = req.scope.strip() or None
+        if req.owner_user_id is not None:
+            guideline.owner_user_id = req.owner_user_id
+        if req.review_due_at is not None:
+            guideline.review_due_at = req.review_due_at
 
         if req.rule_text is not None and req.rule_text.strip() != guideline.rule_text:
             guideline.rule_text = req.rule_text.strip()
