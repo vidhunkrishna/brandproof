@@ -19,6 +19,7 @@ from app.models.submission import (
     Dispute,
     ReviewLog,
 )
+from app.models.visual import VisualBrandConfig, VisualAssetReview
 
 __all__ = [
     "Base",

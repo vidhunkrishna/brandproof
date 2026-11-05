@@ -11,6 +11,7 @@ import SubmissionHistoryPage from './pages/SubmissionHistoryPage';
 import DisputesPage from './pages/DisputesPage';
 import GuidelineHealthPage from './pages/GuidelineHealthPage';
 import FactWatchPage from './pages/FactWatchPage';
+import VisualCompliancePage from './pages/VisualCompliancePage';
 
 function AppLayout() {
   const { loading } = useAuth();
@@ -42,6 +43,7 @@ function AppLayout() {
           <Route path="/disputes/:disputeId" element={<DisputesPage />} />
           <Route path="/guideline-health" element={<GuidelineHealthPage />} />
           <Route path="/factwatch" element={<FactWatchPage />} />
+          <Route path="/visual" element={<VisualCompliancePage />} />
           <Route path="*" element={<Navigate to="/guidelines" replace />} />
         </Routes>
       </main>
