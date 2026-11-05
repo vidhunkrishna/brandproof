@@ -7,6 +7,16 @@ from app.schemas.auth import (
     UserProfileResponse,
     TokenResponse,
 )
+from app.schemas.knowledge import (
+    GuidelineCreateRequest,
+    GuidelineUpdateRequest,
+    GuidelineResponse,
+    FactCreateRequest,
+    FactUpdateRequest,
+    FactSupersedeRequest,
+    FactResponse,
+    DocumentImportResponse,
+)
 
 __all__ = [
     "UserRegisterRequest",
@@ -16,5 +26,12 @@ __all__ = [
     "UserResponse",
     "UserProfileResponse",
     "TokenResponse",
+    "GuidelineCreateRequest",
+    "GuidelineUpdateRequest",
+    "GuidelineResponse",
+    "FactCreateRequest",
+    "FactUpdateRequest",
+    "FactSupersedeRequest",
+    "FactResponse",
+    "DocumentImportResponse",
 ]
-

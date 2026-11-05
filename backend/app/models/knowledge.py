@@ -21,6 +21,7 @@ class Guideline(Base, TimestampMixin):
     status = Column(SQLEnum(GuidelineStatus), default=GuidelineStatus.ACTIVE, nullable=False)
     created_by_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     approved_by_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
 
     # Relationships
     organization = relationship("Organization", back_populates="guidelines")
@@ -48,6 +49,7 @@ class ApprovedFact(Base, TimestampMixin):
     superseded_by_id = Column(String(36), ForeignKey("approved_facts.id", ondelete="SET NULL"), nullable=True)
     status = Column(SQLEnum(FactStatus), default=FactStatus.APPROVED, nullable=False)
     approved_by_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
 
     # Relationships
     organization = relationship("Organization", back_populates="approved_facts")

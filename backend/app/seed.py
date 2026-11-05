@@ -170,10 +170,15 @@ def seed_database(db: Session = None):
                     required_qualifiers=f_data["required_qualifiers"],
                     version=f_data["version"],
                     status=f_data["status"],
-                    approved_by_user_id=admin_user.id if admin_user else None
+                    approved_by_user_id=admin_user.id if admin_user else None,
+                    approved_at=datetime.now(timezone.utc)
                 )
                 db.add(fact)
                 print(f"[SEED] Seeded approved fact: '{f_data['fact_name']}' -> '{f_data['approved_value']}'")
+            else:
+                if not fact.approved_at:
+                    fact.approved_at = datetime.now(timezone.utc)
+                    fact.approved_by_user_id = admin_user.id if admin_user else None
 
         # 4. Guidelines
         for g_data in DEMO_GUIDELINES:
@@ -194,10 +199,15 @@ def seed_database(db: Session = None):
                     source=g_data["source"],
                     status=g_data["status"],
                     created_by_user_id=admin_user.id if admin_user else None,
-                    approved_by_user_id=admin_user.id if admin_user else None
+                    approved_by_user_id=admin_user.id if admin_user else None,
+                    approved_at=datetime.now(timezone.utc)
                 )
                 db.add(guide)
                 print(f"[SEED] Seeded brand guideline: '{g_data['title']}'")
+            else:
+                if not guide.approved_at:
+                    guide.approved_at = datetime.now(timezone.utc)
+                    guide.approved_by_user_id = admin_user.id if admin_user else None
 
         db.commit()
         print("[SEED] Demo data seeding completed successfully!")
