@@ -8,6 +8,7 @@ import DocumentImportPage from './pages/DocumentImportPage';
 import SubmitReviewPage from './pages/SubmitReviewPage';
 import ReviewResultPage from './pages/ReviewResultPage';
 import SubmissionHistoryPage from './pages/SubmissionHistoryPage';
+import DisputesPage from './pages/DisputesPage';
 
 function AppLayout() {
   const { loading } = useAuth();
@@ -35,6 +36,8 @@ function AppLayout() {
           <Route path="/submit" element={<SubmitReviewPage />} />
           <Route path="/submissions" element={<SubmissionHistoryPage />} />
           <Route path="/reviews/:submissionId" element={<ReviewResultPage />} />
+          <Route path="/disputes" element={<DisputesPage />} />
+          <Route path="/disputes/:disputeId" element={<DisputesPage />} />
           <Route path="*" element={<Navigate to="/guidelines" replace />} />
         </Routes>
       </main>

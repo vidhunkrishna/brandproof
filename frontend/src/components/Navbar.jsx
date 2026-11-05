@@ -8,6 +8,7 @@ import {
   FileUp, 
   Send,
   ClipboardList,
+  Scale,
   AlertCircle,
   LogOut, 
   Building2 
@@ -108,6 +109,13 @@ export default function Navbar() {
               >
                 <ClipboardList className="w-4 h-4" />
                 Reviews
+              </NavLink>
+              <NavLink
+                to="/disputes"
+                className={({ isActive }) => `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}
+              >
+                <Scale className="w-4 h-4" />
+                Disputes
               </NavLink>
             </nav>
           </div>

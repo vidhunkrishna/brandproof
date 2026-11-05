@@ -121,6 +121,8 @@ class Dispute(Base, TimestampMixin):
     reason = Column(Text, nullable=False)
     status = Column(SQLEnum(DisputeStatus), default=DisputeStatus.OPEN, nullable=False, index=True)
     resolution_note = Column(Text, nullable=True)
+    # An override is layered over the immutable original Finding; the finding itself is never edited.
+    override_verdict = Column(SQLEnum(FindingVerdict), nullable=True)
     resolved_by_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
 
     # Relationships

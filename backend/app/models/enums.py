@@ -61,6 +61,7 @@ class ReviewLane(str, Enum):
 
 class DisputeStatus(str, Enum):
     OPEN = "open"
+    NEEDS_INFO = "needs_info"
     UPHELD = "upheld"
     REJECTED = "rejected"
     RESOLVED = "resolved"

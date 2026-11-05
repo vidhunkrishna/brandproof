@@ -24,6 +24,9 @@ from app.schemas.submission import (
     SubmissionRevisionResponse,
     SubmissionResponse,
     ReviewResultResponse,
+    DisputeCreateRequest,
+    DisputeResolutionRequest,
+    DisputeResponse,
 )
 
 __all__ = [
@@ -48,4 +51,7 @@ __all__ = [
     "SubmissionRevisionResponse",
     "SubmissionResponse",
     "ReviewResultResponse",
+    "DisputeCreateRequest",
+    "DisputeResolutionRequest",
+    "DisputeResponse",
 ]

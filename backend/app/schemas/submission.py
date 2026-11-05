@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict, model_validator, field_validator
-from app.models.enums import ContentType, SubmissionStatus, FindingVerdict, ReviewLane
+from app.models.enums import ContentType, SubmissionStatus, FindingVerdict, ReviewLane, DisputeStatus
 
 
 class SubmissionCreateRequest(BaseModel):
@@ -122,3 +122,50 @@ class ReviewResultResponse(BaseModel):
     unsupported_claims: int = 0
     unverifiable_claims: int = 0
     findings: List[FindingResponse] = Field(default_factory=list)
+
+
+class DisputeCreateRequest(BaseModel):
+    finding_id: str = Field(..., min_length=1)
+    reason: str = Field(..., min_length=10, max_length=4000)
+
+    @field_validator("reason")
+    @classmethod
+    def validate_reason(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("A dispute reason is required.")
+        return value
+
+
+class DisputeResolutionRequest(BaseModel):
+    action: str = Field(..., pattern="^(uphold|override|request_info)$")
+    reason: str = Field(..., min_length=10, max_length=4000)
+    override_verdict: Optional[FindingVerdict] = None
+
+    @model_validator(mode="after")
+    def validate_override(self) -> "DisputeResolutionRequest":
+        if self.action == "override" and self.override_verdict is None:
+            raise ValueError("override_verdict is required when overriding a finding.")
+        if self.action != "override" and self.override_verdict is not None:
+            raise ValueError("override_verdict is only valid for an override action.")
+        return self
+
+
+class DisputeResponse(BaseModel):
+    id: str
+    organization_id: str
+    finding_id: str
+    submission_id: str
+    revision_id: str
+    revision_number: int
+    raised_by_user_id: str
+    raised_by_name: Optional[str] = None
+    reason: str
+    status: DisputeStatus
+    resolution_note: Optional[str] = None
+    override_verdict: Optional[FindingVerdict] = None
+    resolved_by_user_id: Optional[str] = None
+    resolved_by_name: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    finding: FindingResponse

@@ -22,7 +22,7 @@ function formatDate(date) {
 
 const COUNT_ORDER = ['CORRECT', 'CONTRADICTED', 'OUTDATED', 'UNSUPPORTED', 'UNVERIFIABLE'];
 
-function FindingCard({ finding, index }) {
+function FindingCard({ finding, index, onDispute }) {
   const hasFact = Boolean(finding.fact_name || finding.fact_approved_value || finding.fact_source);
   const hasGuideline = Boolean(finding.guideline_title || finding.guideline_source);
 
@@ -70,13 +70,16 @@ function FindingCard({ finding, index }) {
           <span className="font-bold">Suggested correction: </span>{finding.suggested_correction}
         </div>
       )}
+      {onDispute && (
+        <button onClick={() => onDispute(finding)} className="mt-4 text-xs font-semibold text-indigo-700 hover:text-indigo-900">Dispute this finding</button>
+      )}
     </article>
   );
 }
 
 export default function ReviewResultPage() {
   const { submissionId } = useParams();
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [submission, setSubmission] = useState(location.state?.submission || null);
@@ -88,6 +91,10 @@ export default function ReviewResultPage() {
   const [changeSummary, setChangeSummary] = useState('');
   const [rechecking, setRechecking] = useState(false);
   const [recheckError, setRecheckError] = useState(null);
+  const [disputeFinding, setDisputeFinding] = useState(null);
+  const [disputeReason, setDisputeReason] = useState('');
+  const [disputeError, setDisputeError] = useState(null);
+  const [submittingDispute, setSubmittingDispute] = useState(false);
 
   const requestedRevisionId = searchParams.get('revision');
 
@@ -117,6 +124,7 @@ export default function ReviewResultPage() {
     || revisions[0]
     || null;
   const canRecheck = role === 'admin' || role === 'creator';
+  const canDispute = role === 'creator' && submission?.creator_user_id === user?.id;
   const isLatestRevision = selectedRevision?.id === submission?.latest_revision?.id;
 
   useEffect(() => {
@@ -166,6 +174,17 @@ export default function ReviewResultPage() {
     } finally {
       setRechecking(false);
     }
+  };
+
+  const handleDispute = async (event) => {
+    event.preventDefault();
+    setSubmittingDispute(true); setDisputeError(null);
+    try {
+      await apiClient.post('/api/v1/disputes/', { finding_id: disputeFinding.id, reason: disputeReason.trim() });
+      setDisputeFinding(null); setDisputeReason('');
+    } catch (requestError) {
+      setDisputeError(requestErrorMessage(requestError, 'Unable to submit the dispute.'));
+    } finally { setSubmittingDispute(false); }
   };
 
   if (loading && !submission) {
@@ -316,7 +335,7 @@ export default function ReviewResultPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {findings.map((finding, index) => <FindingCard key={finding.id || `${finding.start_offset}-${index}`} finding={finding} index={index} />)}
+                {findings.map((finding, index) => <FindingCard key={finding.id || `${finding.start_offset}-${index}`} finding={finding} index={index} onDispute={canDispute ? setDisputeFinding : null} />)}
               </div>
             )}
           </section>
@@ -356,6 +375,17 @@ export default function ReviewResultPage() {
           )}
         </aside>
       </div>
+      {disputeFinding && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+          <form onSubmit={handleDispute} className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+            <h2 className="text-lg font-bold text-slate-900">Dispute finding</h2>
+            <p className="mt-1 text-sm text-slate-600">Explain why “{disputeFinding.claim_text}” should be reconsidered. The original finding will remain preserved.</p>
+            {disputeError && <div role="alert" className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{disputeError}</div>}
+            <textarea required minLength={10} maxLength={4000} value={disputeReason} onChange={(event) => setDisputeReason(event.target.value)} className="mt-4 min-h-32 w-full rounded-lg border border-slate-300 p-3 text-sm" placeholder="Provide supporting context or evidence…" />
+            <div className="mt-4 flex justify-end gap-2"><button type="button" onClick={() => { setDisputeFinding(null); setDisputeError(null); }} className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600">Cancel</button><button disabled={submittingDispute || disputeReason.trim().length < 10} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-400">{submittingDispute ? 'Submitting…' : 'Submit dispute'}</button></div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
