@@ -5,6 +5,9 @@ import Navbar from './components/Navbar';
 import GuidelinesPage from './pages/GuidelinesPage';
 import FactsPage from './pages/FactsPage';
 import DocumentImportPage from './pages/DocumentImportPage';
+import SubmitReviewPage from './pages/SubmitReviewPage';
+import ReviewResultPage from './pages/ReviewResultPage';
+import SubmissionHistoryPage from './pages/SubmissionHistoryPage';
 
 function AppLayout() {
   const { loading } = useAuth();
@@ -29,6 +32,9 @@ function AppLayout() {
           <Route path="/guidelines" element={<GuidelinesPage />} />
           <Route path="/facts" element={<FactsPage />} />
           <Route path="/import" element={<DocumentImportPage />} />
+          <Route path="/submit" element={<SubmitReviewPage />} />
+          <Route path="/submissions" element={<SubmissionHistoryPage />} />
+          <Route path="/reviews/:submissionId" element={<ReviewResultPage />} />
           <Route path="*" element={<Navigate to="/guidelines" replace />} />
         </Routes>
       </main>

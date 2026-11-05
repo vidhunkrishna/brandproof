@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+export const AUTH_UNAUTHORIZED_EVENT = 'brandproof:unauthorized';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -27,8 +28,9 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // If unauthorized, clear stale token
-      // localStorage.removeItem('brandproof_token');
+      // Keep the UI and the request client in sync when an access token expires.
+      localStorage.removeItem('brandproof_token');
+      window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT));
     }
     return Promise.reject(error);
   }

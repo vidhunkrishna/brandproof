@@ -6,13 +6,15 @@ import {
   BookOpen, 
   CheckCircle, 
   FileUp, 
-  UserCircle2, 
+  Send,
+  ClipboardList,
+  AlertCircle,
   LogOut, 
   Building2 
 } from 'lucide-react';
 
 export default function Navbar() {
-  const { user, role, activeOrganization, quickLogin, logout } = useAuth();
+  const { user, role, activeOrganization, error, quickLogin, logout } = useAuth();
 
   return (
     <header className="border-b border-slate-200 bg-white sticky top-0 z-40 shadow-xs">
@@ -77,11 +79,47 @@ export default function Navbar() {
                 <FileUp className="w-4 h-4" />
                 Document Import
               </NavLink>
+
+              {(role === 'admin' || role === 'creator') && (
+                <NavLink
+                  to="/submit"
+                  className={({ isActive }) =>
+                    `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${
+                      isActive
+                        ? 'bg-indigo-50 text-indigo-700'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`
+                  }
+                >
+                  <Send className="w-4 h-4" />
+                  Submit Copy
+                </NavLink>
+              )}
+
+              <NavLink
+                to="/submissions"
+                className={({ isActive }) =>
+                  `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${
+                    isActive
+                      ? 'bg-indigo-50 text-indigo-700'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`
+                }
+              >
+                <ClipboardList className="w-4 h-4" />
+                Reviews
+              </NavLink>
             </nav>
           </div>
 
           {/* Right Header: Tenant & Role Switcher */}
           <div className="flex items-center gap-3">
+            {!user && error && (
+              <div role="alert" className="hidden max-w-64 items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-800 xl:flex" title={error}>
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{error}</span>
+              </div>
+            )}
             {activeOrganization && (
               <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-md border border-slate-200 text-xs text-slate-700 font-medium">
                 <Building2 className="w-3.5 h-3.5 text-slate-500" />
@@ -115,7 +153,7 @@ export default function Navbar() {
             {user && (
               <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
                 <button
-                  onClick={logout}
+                  onClick={() => logout()}
                   className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md hover:bg-slate-100 transition"
                   title="Sign Out"
                 >

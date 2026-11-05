@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, Text, Integer, Float, ForeignKey, DateTime, Enum as SQLEnum, JSON
+from typing import Optional
+from sqlalchemy import Boolean, Column, String, Text, Integer, Float, ForeignKey, DateTime, Enum as SQLEnum, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
@@ -7,6 +8,7 @@ from app.models.enums import (
     ContentType,
     SubmissionStatus,
     FindingVerdict,
+    RevisionVerdict,
     ReviewLane,
     DisputeStatus
 )
@@ -28,6 +30,14 @@ class Submission(Base, TimestampMixin):
     revisions = relationship("SubmissionRevision", back_populates="submission", cascade="all, delete-orphan", order_by="SubmissionRevision.revision_number")
     review_logs = relationship("ReviewLog", back_populates="submission", cascade="all, delete-orphan")
 
+    @property
+    def latest_revision(self) -> Optional["SubmissionRevision"]:
+        return self.revisions[-1] if self.revisions else None
+
+    @property
+    def total_revisions(self) -> int:
+        return len(self.revisions) if self.revisions else 0
+
 
 class SubmissionRevision(Base):
     __tablename__ = "submission_revisions"
@@ -37,7 +47,9 @@ class SubmissionRevision(Base):
     revision_number = Column(Integer, default=1, nullable=False)
     content_text = Column(Text, nullable=False)
     change_summary = Column(Text, nullable=True)
-    overall_verdict = Column(String(50), default="PENDING", nullable=False)  # CORRECT, CONTRADICTED, MIXED, etc.
+    overall_verdict = Column(SQLEnum(RevisionVerdict, name="revisionverdict"), default=RevisionVerdict.NEEDS_REVIEW, nullable=False)
+    # Nullable preserves revisions created before review mode was retained.
+    review_used_fallback = Column(Boolean, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
@@ -58,6 +70,10 @@ class Finding(Base):
     fact_id = Column(String(36), ForeignKey("approved_facts.id", ondelete="SET NULL"), nullable=True, index=True)
     guideline_id = Column(String(36), ForeignKey("guidelines.id", ondelete="SET NULL"), nullable=True, index=True)
     confidence_score = Column(Float, nullable=True)
+    # Zero-based, half-open UTF-16 code-unit offsets [start_offset, end_offset)
+    # Binary-compatible with JavaScript `contentText.substring(start_offset, end_offset)`
+    start_offset = Column(Integer, nullable=True)
+    end_offset = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
@@ -65,6 +81,34 @@ class Finding(Base):
     fact = relationship("ApprovedFact", back_populates="findings")
     guideline = relationship("Guideline", back_populates="findings")
     disputes = relationship("Dispute", back_populates="finding", cascade="all, delete-orphan")
+
+    @property
+    def fact_name(self) -> Optional[str]:
+        return self.fact.fact_name if self.fact else None
+
+    @property
+    def fact_version(self) -> Optional[int]:
+        return self.fact.version if self.fact else None
+
+    @property
+    def fact_approved_value(self) -> Optional[str]:
+        return self.fact.approved_value if self.fact else None
+
+    @property
+    def fact_source(self) -> Optional[str]:
+        return self.fact.source if self.fact else None
+
+    @property
+    def guideline_title(self) -> Optional[str]:
+        return self.guideline.title if self.guideline else None
+
+    @property
+    def guideline_version(self) -> Optional[int]:
+        return self.guideline.version if self.guideline else None
+
+    @property
+    def guideline_source(self) -> Optional[str]:
+        return self.guideline.source if self.guideline else None
 
 
 class Dispute(Base, TimestampMixin):

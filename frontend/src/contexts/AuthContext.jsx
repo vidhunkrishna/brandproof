@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import apiClient from '../api/client';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import apiClient, { AUTH_UNAUTHORIZED_EVENT } from '../api/client';
 
 const AuthContext = createContext(null);
 
@@ -17,32 +17,17 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await apiClient.get('/api/v1/auth/me');
-      setUser(res.data.user);
-      setActiveOrganization(res.data.active_organization);
-      setRole(res.data.role);
-    } catch (err) {
-      console.warn('Authentication check failed:', err);
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (token) {
-      fetchProfile();
-    } else {
-      // Default auto-login to Admin for frictionless demo exploration
-      quickLogin('admin');
-    }
+  const logout = useCallback((message = null) => {
+    localStorage.removeItem('brandproof_token');
+    setToken(null);
+    setUser(null);
+    setActiveOrganization(null);
+    setRole(null);
+    setError(typeof message === 'string' ? message : null);
+    setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     setLoading(true);
     setError(null);
     try {
@@ -61,7 +46,40 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const quickLogin = useCallback(async (targetRole) => {
+    const preset = DEMO_PRESETS.find((p) => p.role === targetRole);
+    if (preset) {
+      return login(preset.email, preset.password);
+    }
+    return undefined;
+  }, [login]);
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await apiClient.get('/api/v1/auth/me');
+      setUser(res.data.user);
+      setActiveOrganization(res.data.active_organization);
+      setRole(res.data.role);
+    } catch (err) {
+      console.warn('Authentication check failed:', err);
+      logout(err.response?.status === 401 ? 'Your session has expired. Choose a demo role to reconnect.' : null);
+    } finally {
+      setLoading(false);
+    }
+  }, [logout]);
+
+  useEffect(() => {
+    if (localStorage.getItem('brandproof_token')) {
+      fetchProfile();
+    } else {
+      // Default auto-login to Admin for frictionless demo exploration
+      quickLogin('admin');
+    }
+  }, [fetchProfile, quickLogin]);
 
   const register = async (email, password, full_name, organization_name, selectedRole = 'creator') => {
     setLoading(true);
@@ -90,21 +108,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const quickLogin = async (targetRole) => {
-    const preset = DEMO_PRESETS.find((p) => p.role === targetRole);
-    if (preset) {
-      return await login(preset.email, preset.password);
-    }
-  };
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      logout('Your session has expired. Choose a demo role to reconnect.');
+    };
 
-  const logout = () => {
-    localStorage.removeItem('brandproof_token');
-    setToken(null);
-    setUser(null);
-    setActiveOrganization(null);
-    setRole(null);
-    setLoading(false);
-  };
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+    return () => window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+  }, [logout]);
 
   return (
     <AuthContext.Provider

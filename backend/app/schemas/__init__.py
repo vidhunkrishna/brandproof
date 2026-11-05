@@ -17,6 +17,14 @@ from app.schemas.knowledge import (
     FactResponse,
     DocumentImportResponse,
 )
+from app.schemas.submission import (
+    SubmissionCreateRequest,
+    SubmissionRevisionCreateRequest,
+    FindingResponse,
+    SubmissionRevisionResponse,
+    SubmissionResponse,
+    ReviewResultResponse,
+)
 
 __all__ = [
     "UserRegisterRequest",
@@ -34,4 +42,10 @@ __all__ = [
     "FactSupersedeRequest",
     "FactResponse",
     "DocumentImportResponse",
+    "SubmissionCreateRequest",
+    "SubmissionRevisionCreateRequest",
+    "FindingResponse",
+    "SubmissionRevisionResponse",
+    "SubmissionResponse",
+    "ReviewResultResponse",
 ]
