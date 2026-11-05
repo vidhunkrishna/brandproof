@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+import logging
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import check_db_connection
@@ -11,6 +12,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 # CORS Middleware
 app.add_middleware(
@@ -55,3 +57,13 @@ def health_check():
         "version": settings.VERSION,
         "database": db_health
     }
+
+
+@app.get("/ready", tags=["Health"])
+@app.get(f"{settings.API_V1_PREFIX}/ready", tags=["Health"])
+def readiness_check():
+    """Readiness is strict: deployments should receive traffic only with a database connection."""
+    db_health = check_db_connection()
+    if db_health.get("status") != "connected":
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail={"status": "not_ready", "database": db_health})
+    return {"status": "ready", "service": settings.PROJECT_NAME, "version": settings.VERSION}

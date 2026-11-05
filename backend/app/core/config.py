@@ -51,5 +51,12 @@ class Settings(BaseSettings):
                 )
         return v
 
+    @field_validator("CORS_ORIGINS")
+    @classmethod
+    def validate_cors_origins(cls, value: List[str]) -> List[str]:
+        if os.getenv("ENVIRONMENT", "development").lower() == "production" and (not value or "*" in value):
+            raise ValueError("Production CORS_ORIGINS must be an explicit non-wildcard origin list.")
+        return value
+
 
 settings = Settings()

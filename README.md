@@ -145,7 +145,28 @@ brandproof/
 
 ---
 
+## Deployment and operations
+
+Set `ENVIRONMENT=production`, a strong unique `SECRET_KEY`, a production PostgreSQL `DATABASE_URL`, and explicit `CORS_ORIGINS`. Production startup rejects the placeholder secret and wildcard CORS. Configure the frontend with `VITE_API_URL=https://api.example.com`; the frontend host must return `index.html` for unknown application routes to support React Router refreshes.
+
+Build the backend image with `docker build -t brandproof-api backend`. Apply migrations once as an explicit release job before scaling application replicas:
+
+```bash
+docker run --rm --env-file backend/.env brandproof-api alembic upgrade head
+docker run --rm -p 8000:8000 --env-file backend/.env brandproof-api
+```
+
+Use `/health` for liveness and `/ready` for database-backed readiness. Back up PostgreSQL on a tested schedule (including restore drills); uploaded visual assets are intentionally not retained, only their review measurements and metadata are persisted.
+
+Run verification locally with `cd backend && pytest -q`, `alembic heads`, and `cd frontend && npm run build`. GitHub Actions repeats the backend migration/test and frontend production build. Demo credentials are development-only and are seeded by the local development setup; never deploy them or any `.env` file as production credentials.
+
+## Security limitations
+
+- JWTs are bearer tokens stored by the current demo frontend in browser storage; production should migrate to short-lived HttpOnly secure cookies or an equivalent managed session design.
+- Rate limiting is not yet distributed or proxy-enforced. Configure it at the API gateway before public exposure.
+- Visual checks provide sampled deterministic measurements. They do not provide OCR-based typography verification or pixel-perfect logo identity verification.
+
 ## 🏆 CodeNexus 2026 Commitments
 
 - **Round 2 Deliverable**: Full MVP containing Three-Lane Review Engine, 5 Verdicts, Grounded Evidence, Human Review Queue, and Governance Dashboard.
-- **Round 3 Planned Commitments**: Guideline Health, Visual Brand Checks, and FactWatch (reserved for Round 3).
+- **Round 3 Deliverable**: Guideline Health, Visual Brand Checks, FactWatch, disputes, and governance analytics.
