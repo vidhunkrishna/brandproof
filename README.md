@@ -147,6 +147,8 @@ brandproof/
 
 ## Deployment and operations
 
+For complete step-by-step production setup, environment variable references, and cloud provider guides (Vercel, Render, Neon, Docker), see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 Set `ENVIRONMENT=production`, a strong unique `SECRET_KEY`, a production PostgreSQL `DATABASE_URL`, and explicit `CORS_ORIGINS`. Production startup rejects the placeholder secret and wildcard CORS. Configure the frontend with `VITE_API_URL=https://api.example.com`; the frontend host must return `index.html` for unknown application routes to support React Router refreshes.
 
 Build the backend image with `docker build -t brandproof-api backend`. Apply migrations once as an explicit release job before scaling application replicas:
@@ -159,6 +161,20 @@ docker run --rm -p 8000:8000 --env-file backend/.env brandproof-api
 Use `/health` for liveness and `/ready` for database-backed readiness. Back up PostgreSQL on a tested schedule (including restore drills); uploaded visual assets are intentionally not retained, only their review measurements and metadata are persisted.
 
 Run verification locally with `cd backend && pytest -q`, `alembic heads`, and `cd frontend && npm run build`. GitHub Actions repeats the backend migration/test and frontend production build. Demo credentials are development-only and are seeded by the local development setup; never deploy them or any `.env` file as production credentials.
+
+### Public deployment procedure
+
+The recommended minimal production topology is: a managed PostgreSQL instance, one FastAPI container behind HTTPS, and a static frontend host (or the included Nginx frontend container). Keep the API and frontend on separate public origins and set `CORS_ORIGINS` to the exact frontend HTTPS origin.
+
+1. Create a managed PostgreSQL database and a least-privilege application user. Store its TLS-enabled connection string only in the deployment platform's secret manager as `DATABASE_URL`; never put it in a repository file, image, or frontend variable.
+2. Set backend runtime secrets: `ENVIRONMENT=production`, a randomly generated `SECRET_KEY`, `DATABASE_URL`, and `CORS_ORIGINS=["https://app.example.com"]`. Set optional `LLM_API_KEY` only in that secret manager.
+3. Build and publish the API image: `docker build -t registry.example/brandproof-api:VERSION backend`. Run the migration command once as a release job: `docker run --rm --env-file runtime.env registry.example/brandproof-api:VERSION alembic upgrade head`. Do not run concurrent migration jobs.
+4. Start the API with HTTPS termination at the platform/load balancer and route probes to `/health` (liveness) and `/ready` (database readiness). The included backend container listens on port 8000.
+5. Build the frontend with the public API origin: `docker build --build-arg VITE_API_URL=https://api.example.com -t registry.example/brandproof-web:VERSION frontend`. Alternatively set that value in the static-host build environment. `VITE_*` values are public and must never contain secrets.
+6. Deploy the frontend with an SPA rewrite rule. The included `frontend/nginx.conf` uses `try_files $uri $uri/ /index.html`, which preserves direct navigation to React Router URLs.
+7. Smoke test over HTTPS: `GET /health`, `GET /ready`, login, submission creation, a protected cross-origin request from the deployed frontend, and a browser refresh on `/submissions`.
+
+Before releasing, take a verified database backup, retain migration history, and have a tested restore procedure. Roll back application images independently from database migrations; only downgrade a migration after assessing data-loss implications.
 
 ## Security limitations
 

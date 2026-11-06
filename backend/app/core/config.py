@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Union
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/brandproof"
     
     # CORS
-    CORS_ORIGINS: List[str] = [
+    CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
@@ -44,11 +44,25 @@ class Settings(BaseSettings):
         # In production, disallow default placeholder or empty keys
         env = os.getenv("ENVIRONMENT", "development").lower()
         if env == "production":
-            if not v or "insecure" in v.lower() or "change-in-production" in v.lower():
+            if not v or len(v) < 32 or "insecure" in v.lower() or "change-in-production" in v.lower():
                 raise ValueError(
                     "CRITICAL SECURITY ERROR: A secure, non-default SECRET_KEY environment variable "
-                    "must be provided in production mode."
+                    "of at least 32 characters must be provided in production mode."
                 )
+        return v
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v):
+        if isinstance(v, str):
+            v = v.strip()
+            if v.startswith("[") and v.endswith("]"):
+                import json
+                try:
+                    return json.loads(v)
+                except Exception:
+                    pass
+            return [x.strip() for x in v.split(",") if x.strip()]
         return v
 
     @field_validator("CORS_ORIGINS")

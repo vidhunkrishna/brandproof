@@ -9,8 +9,8 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     description="BrandProof: Evidence Before Approval — AI-Assisted Brand Governance Platform",
     version=settings.VERSION,
-    docs_url="/docs",
-    redoc_url="/redoc"
+    docs_url=None if settings.ENVIRONMENT.lower() == "production" else "/docs",
+    redoc_url=None if settings.ENVIRONMENT.lower() == "production" else "/redoc"
 )
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
@@ -43,7 +43,7 @@ def root():
         "tagline": "Evidence Before Approval",
         "version": settings.VERSION,
         "status": "online",
-        "docs_url": "/docs"
+        "docs_url": "/docs" if settings.ENVIRONMENT.lower() != "production" else None
     }
 
 
