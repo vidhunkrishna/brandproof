@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useAuth, DEMO_PRESETS } from '../contexts/AuthContext';
 import { 
   ShieldCheck, 
@@ -24,6 +24,8 @@ import {
 export default function Navbar() {
   const { user, role, activeOrganization, error, quickLogin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isHowItWorksActive = location.pathname === '/' || location.pathname === '/how-it-works';
 
   const linkClass = ({ isActive }) =>
     `flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition cursor-pointer shrink-0 ${
@@ -83,7 +85,7 @@ export default function Navbar() {
         <div className={`flex items-center justify-between gap-4 ${role === 'admin' ? 'min-h-[72px] py-2' : 'h-16'}`}>
           {/* Logo & Brand */}
           <div className="flex items-center gap-6 xl:gap-8 shrink-0">
-            <Link to="/how-it-works" className="flex items-center gap-2.5 group" title="BrandProof Product Overview">
+            <Link to="/" className="flex items-center gap-2.5 group" title="BrandProof Product Overview">
               <div className="bg-indigo-600 text-white p-2 rounded-lg flex items-center justify-center shadow-xs group-hover:bg-indigo-700 transition">
                 <ShieldCheck className="w-5 h-5" />
               </div>
@@ -147,17 +149,15 @@ export default function Navbar() {
           <div className="flex items-center gap-2.5 shrink-0">
             {/* Dedicated "How It Works" Guide Link (Shared across all roles & visitors) */}
             <NavLink
-              to="/how-it-works"
-              className={({ isActive }) =>
-                `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer border ${
-                  isActive
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                    : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 shadow-2xs'
-                }`
-              }
-              title="Judge & Product Guide"
+              to="/"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer border ${
+                isHowItWorksActive
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                  : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 shadow-2xs'
+              }`}
+              title="Judge & Product Guide (Home)"
             >
-              <HelpCircle className="w-3.5 h-3.5 text-indigo-500" />
+              <HelpCircle className={`w-3.5 h-3.5 ${isHowItWorksActive ? 'text-white' : 'text-indigo-500'}`} />
               <span>How It Works</span>
             </NavLink>
 
@@ -224,8 +224,22 @@ export default function Navbar() {
         {/* Responsive Mobile / Tablet Drawer */}
         {mobileMenuOpen && (
           <div className="lg:hidden py-4 border-t border-slate-200 space-y-3">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3">
-              Navigation Menu ({role || 'Guest'})
+            <div className="flex items-center justify-between px-3">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                Navigation Menu ({role || 'Guest'})
+              </span>
+              <NavLink
+                to="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold ${
+                  isHowItWorksActive
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-indigo-50 text-indigo-700'
+                }`}
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>Product Guide</span>
+              </NavLink>
             </div>
             <div className="grid grid-cols-2 gap-1 px-1">
               {role === 'admin' ? (

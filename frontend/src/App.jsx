@@ -18,7 +18,7 @@ import AnalyticsPage from './pages/AnalyticsPage';
 function AppLayout() {
   const { loading } = useAuth();
   const location = useLocation();
-  const isPublicRoute = location.pathname === '/how-it-works';
+  const isPublicRoute = location.pathname === '/' || location.pathname === '/how-it-works';
 
   if (loading && !isPublicRoute) {
     return (
@@ -36,7 +36,7 @@ function AppLayout() {
       <Navbar />
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <Routes>
-          <Route path="/" element={<Navigate to="/guidelines" replace />} />
+          <Route path="/" element={<HowItWorksPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/guidelines" element={<GuidelinesPage />} />
           <Route path="/facts" element={<FactsPage />} />
@@ -50,7 +50,7 @@ function AppLayout() {
           <Route path="/factwatch" element={<FactWatchPage />} />
           <Route path="/visual" element={<VisualCompliancePage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="*" element={<Navigate to="/guidelines" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <footer className="border-t border-slate-200 py-6 bg-white text-center text-xs text-slate-500">
