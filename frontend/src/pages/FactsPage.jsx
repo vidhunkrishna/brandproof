@@ -73,6 +73,7 @@ export default function FactsPage() {
 
   useEffect(() => {
     fetchFacts();
+    return () => {};
   }, [categoryFilter, statusFilter]);
 
   const handleSearch = (e) => {

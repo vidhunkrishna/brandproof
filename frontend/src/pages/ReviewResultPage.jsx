@@ -113,6 +113,7 @@ export default function ReviewResultPage() {
 
   useEffect(() => {
     loadSubmission();
+    return () => {};
   }, [loadSubmission]);
 
   const revisions = useMemo(
@@ -134,6 +135,7 @@ export default function ReviewResultPage() {
       setEditing(false);
       setRecheckError(null);
     }
+    return () => {};
   }, [selectedRevision?.id]);
 
   const reviewResultForSelected = latestReviewResult?.revision_id === selectedRevision?.id

@@ -53,6 +53,7 @@ export default function SubmissionHistoryPage() {
 
   useEffect(() => {
     fetchSubmissions();
+    return () => {};
   }, [fetchSubmissions]);
 
   return (

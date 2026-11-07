@@ -79,6 +79,7 @@ export const AuthProvider = ({ children }) => {
       // Default auto-login to Admin for frictionless demo exploration
       quickLogin('admin');
     }
+    return () => {};
   }, [fetchProfile, quickLogin]);
 
   const register = async (email, password, full_name, organization_name, selectedRole = 'creator') => {

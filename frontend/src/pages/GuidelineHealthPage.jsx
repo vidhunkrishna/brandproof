@@ -4,9 +4,24 @@ import apiClient from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function GuidelineHealthPage() {
-  const { role } = useAuth(); const [data, setData] = useState(null); const [error, setError] = useState(null);
-  const load = useCallback(async () => { try { setError(null); setData((await apiClient.get('/api/v1/guideline-health/')).data); } catch (e) { setError(e.response?.data?.detail || 'Unable to load guideline health.'); } }, []);
-  useEffect(() => { if (role === 'admin') load(); }, [role, load]);
+  const { role } = useAuth();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const load = useCallback(async () => {
+    try {
+      setError(null);
+      setData((await apiClient.get('/api/v1/guideline-health/')).data);
+    } catch (e) {
+      setError(e.response?.data?.detail || 'Unable to load guideline health.');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (role === 'admin') {
+      load();
+    }
+    return () => {};
+  }, [role, load]);
   if (role !== 'admin') return <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">Guideline Health is available to organization administrators.</div>;
   if (!data && !error) return <div className="p-10 text-center text-sm text-slate-500"><LoaderCircle className="mx-auto mb-2 h-6 w-6 animate-spin" />Loading guideline health…</div>;
   if (error) return <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-5 text-rose-900"><AlertCircle className="mr-2 inline h-4 w-4" />{error}</div>;

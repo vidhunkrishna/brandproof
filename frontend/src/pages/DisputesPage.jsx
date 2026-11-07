@@ -27,7 +27,10 @@ export default function DisputesPage() {
     } catch (requestError) { setError(errorMessage(requestError, 'Unable to load disputes.')); }
     finally { setLoading(false); }
   }, [disputeId, role]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+    return () => {};
+  }, [load]);
 
   const resolve = async (event) => {
     event.preventDefault(); setSaving(true); setError(null);

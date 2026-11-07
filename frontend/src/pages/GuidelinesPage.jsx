@@ -56,6 +56,7 @@ export default function GuidelinesPage() {
 
   useEffect(() => {
     fetchGuidelines();
+    return () => {};
   }, [categoryFilter, statusFilter]);
 
   const handleSearch = (e) => {
