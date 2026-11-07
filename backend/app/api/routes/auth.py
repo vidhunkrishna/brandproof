@@ -67,3 +67,16 @@ def admin_only_check(ctx: TenantContext = Depends(require_roles([UserRole.ADMIN]
         "message": f"Welcome Admin {ctx.user.full_name} to {ctx.organization.name}."
     }
 
+
+@router.post("/seed-demo", response_model=dict)
+def seed_demo_endpoint(db: Session = Depends(get_db)):
+    """Initialize or refresh demonstration data for the synthetic Lumen brand.
+    Safe and idempotent: populates demo users, guidelines, approved facts, submissions, and dispute queue.
+    """
+    from app.seed import seed_database
+    seed_database(db)
+    return {
+        "status": "success",
+        "message": "Demo data initialized successfully with Lumen organization, demo users, guidelines, facts, submissions, and dispute queue."
+    }
+

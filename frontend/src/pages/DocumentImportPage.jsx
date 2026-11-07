@@ -6,21 +6,35 @@ import {
   FileText, 
   CheckCircle2, 
   AlertTriangle, 
-  Clock, 
-  ShieldCheck, 
   RefreshCw,
-  ArrowRight,
-  ExternalLink
+  Sparkles
 } from 'lucide-react';
 
 export default function DocumentImportPage() {
   const { role } = useAuth();
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [loadingSample, setLoadingSample] = useState(false);
   const [uploadResult, setUploadResult] = useState(null);
   const [error, setError] = useState(null);
   const [approvingId, setApprovingId] = useState(null);
   const [approvedIds, setApprovedIds] = useState(new Set());
+
+  const handleLoadSample = async () => {
+    setLoadingSample(true);
+    setError(null);
+    try {
+      const res = await apiClient.get('/api/v1/documents/sample-file', { responseType: 'blob' });
+      const sampleFile = new File([res.data], 'Lumen_Brand_Guidelines_Sample.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      });
+      setSelectedFile(sampleFile);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Unable to load sample document.');
+    } finally {
+      setLoadingSample(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -81,6 +95,41 @@ export default function DocumentImportPage() {
         <p className="text-sm text-slate-500 mt-1">
           Upload text-based PDF or Word (.docx) brand manuals to automatically extract and stage candidate governance rules.
         </p>
+      </div>
+
+      {/* 1-Click Demo Document Helper */}
+      <div className="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-indigo-600 text-white shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900">Try Sample Lumen Brand Guide</h3>
+            <p className="text-xs text-slate-600 mt-0.5">
+              Don&apos;t have a local .docx or .pdf? Load our pre-configured Lumen Brand Manual with 4 test policy sections.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+          <button
+            type="button"
+            onClick={handleLoadSample}
+            disabled={loadingSample || uploading}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+          >
+            {loadingSample ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                Loading Sample...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5" />
+                Load Sample Brand Manual
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Upload Dropzone Card */}

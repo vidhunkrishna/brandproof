@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import apiClient from '../api/client';
 import { useAuth, DEMO_PRESETS } from '../contexts/AuthContext';
 import {
   ShieldCheck,
@@ -19,7 +20,6 @@ import {
   Sparkles,
   Target,
   FileCheck2,
-  HelpCircle,
   Zap,
   Lightbulb,
   Building2
@@ -27,6 +27,22 @@ import {
 
 export default function HowItWorksPage() {
   const { role, quickLogin } = useAuth();
+  const [seeding, setSeeding] = useState(false);
+  const [seedStatus, setSeedStatus] = useState(null);
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    setSeedStatus(null);
+    try {
+      const res = await apiClient.post('/api/v1/auth/seed-demo');
+      setSeedStatus({ type: 'success', message: res.data?.message || 'Synthetic demo data successfully initialized!' });
+    } catch (err) {
+      setSeedStatus({ type: 'error', message: err.response?.data?.detail || 'Failed to initialize demo data.' });
+    } finally {
+      setSeeding(false);
+    }
+  };
+
 
   return (
     <div className="space-y-12 max-w-6xl mx-auto pb-16 font-sans">
@@ -785,30 +801,75 @@ export default function HowItWorksPage() {
         </div>
 
         <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-6 space-y-4">
-          <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
-            Synthetic Demo Data Notice
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              Synthetic Demo Data Notice
+            </div>
+            <button
+              type="button"
+              onClick={handleSeed}
+              disabled={seeding}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 disabled:bg-slate-300 text-white text-xs font-semibold shadow-xs transition cursor-pointer self-start sm:self-auto"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              {seeding ? 'Seeding Demo Data...' : 'Reset / Re-Seed Demo Data'}
+            </button>
           </div>
+
+          {seedStatus && (
+            <div className={`p-3 rounded-lg text-xs font-medium flex items-center gap-2 ${
+              seedStatus.type === 'success'
+                ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                : 'bg-rose-50 border border-rose-200 text-rose-800'
+            }`}>
+              {seedStatus.type === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              )}
+              <span>{seedStatus.message}</span>
+            </div>
+          )}
+
           <p className="text-xs text-amber-900/90 leading-relaxed">
-            <strong>Lumen Smart Lighting</strong> is a synthetic demonstration brand populated in the BrandProof database for the <strong>CodeNexus India 2026 Hackathon</strong>. All guidelines, facts, and submissions are synthetic sample data designed to stress-test the three-lane governance engine.
+            <strong>Lumen Smart Lighting</strong> is a synthetic demonstration brand pre-populated in the BrandProof database for the <strong>CodeNexus India 2026 Hackathon</strong>. All guidelines, facts, review submissions, and open dispute records are synthetic sample data designed to stress-test the three-lane governance engine.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <div className="bg-white p-4 rounded-xl border border-amber-200/60 shadow-2xs space-y-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">Approved Fact #1</span>
-              <h5 className="font-bold text-slate-900 text-sm">Energy Savings Specification</h5>
-              <p className="text-xs text-slate-600">
-                <strong>Approved Value:</strong> Up to 60% in laboratory tests.<br />
-                <strong>Constraint:</strong> Claims must include the qualifier <em>"in laboratory tests"</em> and cannot claim values exceeding 60%.
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+            <div className="bg-white p-3.5 rounded-xl border border-amber-200/60 shadow-2xs space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Approved Fact #1</span>
+              <h5 className="font-bold text-slate-900 text-xs">Energy Savings Spec</h5>
+              <p className="text-[11px] text-slate-600 leading-snug">
+                <strong>Value:</strong> Up to 60% in laboratory tests.<br />
+                <strong>Constraint:</strong> Requires qualifier <em>&quot;in laboratory tests&quot;</em>.
               </p>
             </div>
 
-            <div className="bg-white p-4 rounded-xl border border-amber-200/60 shadow-2xs space-y-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">Approved Guideline #1</span>
-              <h5 className="font-bold text-slate-900 text-sm">Warranty Terminology Policy</h5>
-              <p className="text-xs text-slate-600">
-                <strong>Approved Value:</strong> 3-year standard limited warranty.<br />
-                <strong>Prohibited Phrasing:</strong> The phrase <em>"lifetime warranty"</em> is strictly prohibited and triggers an immediate contradiction finding.
+            <div className="bg-white p-3.5 rounded-xl border border-amber-200/60 shadow-2xs space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Approved Fact #2</span>
+              <h5 className="font-bold text-slate-900 text-xs">Bulb Lifespan Spec</h5>
+              <p className="text-[11px] text-slate-600 leading-snug">
+                <strong>Value:</strong> 25,000 hours under standard residential usage.<br />
+                <strong>Operator:</strong> &gt;= 25000 hours.
+              </p>
+            </div>
+
+            <div className="bg-white p-3.5 rounded-xl border border-amber-200/60 shadow-2xs space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Approved Guideline #1</span>
+              <h5 className="font-bold text-slate-900 text-xs">Warranty Terminology</h5>
+              <p className="text-[11px] text-slate-600 leading-snug">
+                <strong>Value:</strong> 3-year standard limited warranty.<br />
+                <strong>Prohibited:</strong> <em>&quot;lifetime warranty&quot;</em>.
+              </p>
+            </div>
+
+            <div className="bg-white p-3.5 rounded-xl border border-amber-200/60 shadow-2xs space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Human Review Dispute #1</span>
+              <h5 className="font-bold text-slate-900 text-xs">Quantum Mesh Claim</h5>
+              <p className="text-[11px] text-slate-600 leading-snug">
+                <strong>Status:</strong> Active Open in <Link to="/disputes" className="text-indigo-600 font-bold underline">/disputes</Link>.<br />
+                <strong>Creator Reason:</strong> Thread radio architecture IEEE exception.
               </p>
             </div>
           </div>

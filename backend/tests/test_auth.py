@@ -311,3 +311,12 @@ def test_database_persistence_and_cross_org_query_isolation():
         assert "3 years" in fact_names["Product warranty"]
     finally:
         db.close()
+
+
+def test_seed_demo_endpoint():
+    """Verify that POST /api/v1/auth/seed-demo executes idempotently and returns success."""
+    res = client.post("/api/v1/auth/seed-demo")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "success"
+    assert "initialized successfully" in data["message"]

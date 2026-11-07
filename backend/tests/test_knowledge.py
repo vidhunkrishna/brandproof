@@ -424,3 +424,12 @@ def test_document_import_unextractable_empty_pdf(lumen_tokens):
     )
     assert res.status_code == 422
     assert "No extractable text found" in res.json()["detail"]
+
+
+def test_document_sample_file_download():
+    """Verify that GET /api/v1/documents/sample-file delivers a valid Word .docx sample."""
+    res = client.get("/api/v1/documents/sample-file")
+    assert res.status_code == 200
+    assert "application/vnd.openxmlformats-officedocument.wordprocessingml.document" in res.headers["content-type"]
+    assert "Lumen_Brand_Guidelines_Sample.docx" in res.headers.get("content-disposition", "")
+    assert len(res.content) > 1000
