@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, Link } from 'react-router-dom';
 import { useAuth, DEMO_PRESETS } from '../contexts/AuthContext';
 import { 
   ShieldCheck, 
@@ -15,20 +15,76 @@ import {
   ChartNoAxesCombined,
   AlertCircle,
   LogOut, 
-  Building2 
+  Building2,
+  HelpCircle,
+  Menu,
+  X
 } from 'lucide-react';
 
 export default function Navbar() {
   const { user, role, activeOrganization, error, quickLogin, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const linkClass = ({ isActive }) =>
+    `flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition cursor-pointer shrink-0 ${
+      isActive
+        ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+    }`;
+
+  const mobileLinkClass = ({ isActive }) =>
+    `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
+      isActive
+        ? 'bg-indigo-50 text-indigo-700 font-semibold'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+    }`;
+
+  // 10 Admin links split into two rows of 5
+  const adminTopRow = [
+    { to: '/guidelines', label: 'Guidelines', icon: BookOpen },
+    { to: '/facts', label: 'Approved Facts', icon: CheckCircle },
+    { to: '/import', label: 'Document Import', icon: FileUp },
+    { to: '/submit', label: 'Submit Copy', icon: Send },
+    { to: '/submissions', label: 'Reviews', icon: ClipboardList },
+  ];
+
+  const adminBottomRow = [
+    { to: '/disputes', label: 'Disputes', icon: Scale },
+    { to: '/guideline-health', label: 'Guideline Health', icon: HeartPulse },
+    { to: '/factwatch', label: 'FactWatch', icon: BellRing },
+    { to: '/visual', label: 'Visual checks', icon: Image },
+    { to: '/analytics', label: 'Analytics', icon: ChartNoAxesCombined },
+  ];
+
+  // Creator links (single row)
+  const creatorLinks = [
+    { to: '/guidelines', label: 'Guidelines', icon: BookOpen },
+    { to: '/facts', label: 'Approved Facts', icon: CheckCircle },
+    { to: '/import', label: 'Document Import', icon: FileUp },
+    { to: '/submit', label: 'Submit Copy', icon: Send },
+    { to: '/submissions', label: 'Reviews', icon: ClipboardList },
+    { to: '/disputes', label: 'Disputes', icon: Scale },
+    { to: '/visual', label: 'Visual checks', icon: Image },
+  ];
+
+  // Reviewer / Default links (single row)
+  const reviewerLinks = [
+    { to: '/guidelines', label: 'Guidelines', icon: BookOpen },
+    { to: '/facts', label: 'Approved Facts', icon: CheckCircle },
+    { to: '/import', label: 'Document Import', icon: FileUp },
+    { to: '/submissions', label: 'Reviews', icon: ClipboardList },
+    { to: '/disputes', label: 'Disputes', icon: Scale },
+    { to: '/visual', label: 'Visual checks', icon: Image },
+  ];
 
   return (
     <header className="border-b border-slate-200 bg-white sticky top-0 z-40 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className={`flex items-center justify-between gap-4 ${role === 'admin' ? 'min-h-[72px] py-2' : 'h-16'}`}>
           {/* Logo & Brand */}
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2.5">
-              <div className="bg-indigo-600 text-white p-2 rounded-lg flex items-center justify-center shadow-xs">
+          <div className="flex items-center gap-6 xl:gap-8 shrink-0">
+            <Link to="/how-it-works" className="flex items-center gap-2.5 group" title="BrandProof Product Overview">
+              <div className="bg-indigo-600 text-white p-2 rounded-lg flex items-center justify-center shadow-xs group-hover:bg-indigo-700 transition">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
@@ -39,113 +95,89 @@ export default function Navbar() {
                   Evidence Before Approval
                 </span>
               </div>
-            </div>
-
-            {/* Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1">
-              <NavLink
-                to="/guidelines"
-                className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${
-                    isActive
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`
-                }
-              >
-                <BookOpen className="w-4 h-4" />
-                Guidelines
-              </NavLink>
-
-              <NavLink
-                to="/facts"
-                className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${
-                    isActive
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`
-                }
-              >
-                <CheckCircle className="w-4 h-4" />
-                Approved Facts
-              </NavLink>
-
-              <NavLink
-                to="/import"
-                className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${
-                    isActive
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`
-                }
-              >
-                <FileUp className="w-4 h-4" />
-                Document Import
-              </NavLink>
-
-              {(role === 'admin' || role === 'creator') && (
-                <NavLink
-                  to="/submit"
-                  className={({ isActive }) =>
-                    `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${
-                      isActive
-                        ? 'bg-indigo-50 text-indigo-700'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`
-                  }
-                >
-                  <Send className="w-4 h-4" />
-                  Submit Copy
-                </NavLink>
-              )}
-
-              <NavLink
-                to="/submissions"
-                className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${
-                    isActive
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`
-                }
-              >
-                <ClipboardList className="w-4 h-4" />
-                Reviews
-              </NavLink>
-              <NavLink
-                to="/disputes"
-                className={({ isActive }) => `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}
-              >
-                <Scale className="w-4 h-4" />
-                Disputes
-              </NavLink>
-              {role === 'admin' && <NavLink to="/guideline-health" className={({ isActive }) => `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}><HeartPulse className="w-4 h-4" />Guideline Health</NavLink>}
-              {role === 'admin' && <NavLink to="/factwatch" className={({ isActive }) => `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}><BellRing className="w-4 h-4" />FactWatch</NavLink>}
-              <NavLink to="/visual" className={({ isActive }) => `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}><Image className="w-4 h-4" />Visual checks</NavLink>
-              {role === 'admin' && <NavLink to="/analytics" className={({ isActive }) => `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}><ChartNoAxesCombined className="w-4 h-4" />Analytics</NavLink>}
-            </nav>
+            </Link>
           </div>
 
-          {/* Right Header: Tenant & Role Switcher */}
-          <div className="flex items-center gap-3">
+          {/* Center Navigation Container */}
+          <nav className="hidden lg:flex flex-col justify-center gap-1.5 my-1 shrink-0" aria-label="Main Navigation">
+            {role === 'admin' ? (
+              <div className="flex flex-col gap-1">
+                {/* Top Row: First 5 existing admin navigation links */}
+                <div className="flex items-center gap-1">
+                  {adminTopRow.map(({ to, label, icon: Icon }) => (
+                    <NavLink key={to} to={to} className={linkClass}>
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{label}</span>
+                    </NavLink>
+                  ))}
+                </div>
+
+                {/* Bottom Row: Remaining 5 existing admin navigation links */}
+                <div className="flex items-center gap-1 pt-1 border-t border-slate-100">
+                  {adminBottomRow.map(({ to, label, icon: Icon }) => (
+                    <NavLink key={to} to={to} className={linkClass}>
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{label}</span>
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            ) : role === 'creator' ? (
+              <div className="flex items-center gap-1">
+                {creatorLinks.map(({ to, label, icon: Icon }) => (
+                  <NavLink key={to} to={to} className={linkClass}>
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{label}</span>
+                  </NavLink>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center gap-1">
+                {reviewerLinks.map(({ to, label, icon: Icon }) => (
+                  <NavLink key={to} to={to} className={linkClass}>
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{label}</span>
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </nav>
+
+          {/* Right Header: "How It Works" + Tenant + Role Switcher */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Dedicated "How It Works" Guide Link (Shared across all roles & visitors) */}
+            <NavLink
+              to="/how-it-works"
+              className={({ isActive }) =>
+                `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer border ${
+                  isActive
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                    : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 shadow-2xs'
+                }`
+              }
+              title="Judge & Product Guide"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-indigo-500" />
+              <span>How It Works</span>
+            </NavLink>
+
             {!user && error && (
-              <div role="alert" className="hidden max-w-64 items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-800 xl:flex" title={error}>
+              <div role="alert" className="hidden max-w-56 items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-800 xl:flex" title={error}>
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">{error}</span>
               </div>
             )}
+
             {activeOrganization && (
-              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-md border border-slate-200 text-xs text-slate-700 font-medium">
+              <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-md border border-slate-200 text-xs text-slate-700 font-medium">
                 <Building2 className="w-3.5 h-3.5 text-slate-500" />
-                <span>{activeOrganization.name}</span>
+                <span className="max-w-[100px] truncate">{activeOrganization.name}</span>
               </div>
             )}
 
             {/* Quick Role Switcher for Hackathon Judges */}
             <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
-              <span className="text-[11px] font-semibold text-slate-400 px-2 uppercase">Role:</span>
+              <span className="text-[11px] font-semibold text-slate-400 px-1.5 uppercase hidden sm:inline">Role:</span>
               {DEMO_PRESETS.map((p) => {
                 const isActiveRole = role === p.role;
                 return (
@@ -167,20 +199,96 @@ export default function Navbar() {
 
             {/* User profile dropdown / signout */}
             {user && (
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+              <div className="flex items-center gap-2 pl-1 border-l border-slate-200">
                 <button
                   onClick={() => logout()}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md hover:bg-slate-100 transition"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md hover:bg-slate-100 transition cursor-pointer"
                   title="Sign Out"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
             )}
+
+            {/* Mobile menu toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Responsive Mobile / Tablet Drawer */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden py-4 border-t border-slate-200 space-y-3">
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3">
+              Navigation Menu ({role || 'Guest'})
+            </div>
+            <div className="grid grid-cols-2 gap-1 px-1">
+              {role === 'admin' ? (
+                <>
+                  <div className="col-span-2 text-[10px] font-bold text-indigo-600 uppercase tracking-wider px-2 pt-1">
+                    Core Operations (Row 1)
+                  </div>
+                  {adminTopRow.map(({ to, label, icon: Icon }) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={mobileLinkClass}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{label}</span>
+                    </NavLink>
+                  ))}
+
+                  <div className="col-span-2 text-[10px] font-bold text-indigo-600 uppercase tracking-wider px-2 pt-2 border-t border-slate-100 mt-1">
+                    Governance &amp; Analytics (Row 2)
+                  </div>
+                  {adminBottomRow.map(({ to, label, icon: Icon }) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={mobileLinkClass}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{label}</span>
+                    </NavLink>
+                  ))}
+                </>
+              ) : role === 'creator' ? (
+                creatorLinks.map(({ to, label, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={mobileLinkClass}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{label}</span>
+                  </NavLink>
+                ))
+              ) : (
+                reviewerLinks.map(({ to, label, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={mobileLinkClass}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{label}</span>
+                  </NavLink>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
 }
-

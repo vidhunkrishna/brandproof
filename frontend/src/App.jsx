@@ -1,7 +1,8 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
+import HowItWorksPage from './pages/HowItWorksPage';
 import GuidelinesPage from './pages/GuidelinesPage';
 import FactsPage from './pages/FactsPage';
 import DocumentImportPage from './pages/DocumentImportPage';
@@ -16,8 +17,10 @@ import AnalyticsPage from './pages/AnalyticsPage';
 
 function AppLayout() {
   const { loading } = useAuth();
+  const location = useLocation();
+  const isPublicRoute = location.pathname === '/how-it-works';
 
-  if (loading) {
+  if (loading && !isPublicRoute) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 font-sans">
         <div className="flex items-center gap-3 bg-white px-6 py-4 rounded-xl border border-slate-200 shadow-sm">
@@ -34,6 +37,7 @@ function AppLayout() {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <Routes>
           <Route path="/" element={<Navigate to="/guidelines" replace />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/guidelines" element={<GuidelinesPage />} />
           <Route path="/facts" element={<FactsPage />} />
           <Route path="/import" element={<DocumentImportPage />} />
